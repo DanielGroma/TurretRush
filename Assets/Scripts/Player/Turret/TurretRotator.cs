@@ -4,9 +4,7 @@ using UnityEngine.InputSystem;
 
 public class TurretRotator : MonoBehaviour
 {
-    [SerializeField] private float _rotationSpeed = 120f;
-    [SerializeField] private float _maxAngle = 45f;
-
+    private TurretConfig _turretConfig;
     private GameStateManager _gameStateManager;
     private InputHandler _input;
     private float _currentAngle = 0f;
@@ -14,8 +12,9 @@ public class TurretRotator : MonoBehaviour
     private bool canUseTurret = false;
 
     [Inject]
-    public void Construct(GameStateManager gameStateManager, InputHandler input)
+    public void Construct(GameStateManager gameStateManager, InputHandler input, TurretConfig turretConfig)
     {
+        _turretConfig = turretConfig;
         _gameStateManager = gameStateManager;
         _input = input;
     }
@@ -47,9 +46,9 @@ public class TurretRotator : MonoBehaviour
         else if (Touchscreen.current != null)
             deltaX = Touchscreen.current.primaryTouch.delta.ReadValue().x;
 
-        _currentAngle += deltaX * _rotationSpeed * Time.deltaTime;
+        _currentAngle += deltaX * _turretConfig.rotationSpeed * Time.deltaTime;
 
-        _currentAngle = Mathf.Clamp(_currentAngle, - _maxAngle, _maxAngle);
+        _currentAngle = Mathf.Clamp(_currentAngle, - _turretConfig.maxAngle, _turretConfig.maxAngle);
 
         Vector3 forward = transform.parent.forward;
         Quaternion targetRotation = Quaternion.Euler(0, _currentAngle, 0) * Quaternion.LookRotation(forward);

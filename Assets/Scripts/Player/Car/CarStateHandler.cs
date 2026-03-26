@@ -43,7 +43,11 @@ public class CarStateHandler : MonoBehaviour
     {
         if (newState == GameState.Playing)
             _carMovement.StartMoving();
-        else
+        else if(newState == GameState.Lose)
+        {
             _carMovement.StopMoving();
+            Time.timeScale = 0;
+            Destroy(transform.gameObject);
+        }
     }
 }

@@ -1,9 +1,17 @@
 ﻿using UnityEngine;
+using Zenject;
 
 public class CarMovement : MonoBehaviour
 {
-    [SerializeField] private float _moveSpeed = 5f;
+    private PlayerConfig _config;
+
     private bool canMove = false;
+
+    [Inject]
+    public void Construct(PlayerConfig playerConfig)
+    {
+        _config = playerConfig;
+    }
 
     public void StartMoving() => canMove = true;
     public void StopMoving() => canMove = false;
@@ -12,7 +20,7 @@ public class CarMovement : MonoBehaviour
     {
         if (canMove)
         {
-            transform.Translate(transform.forward * _moveSpeed * Time.deltaTime, Space.World);
+            transform.Translate(transform.forward * _config.moveSpeed * Time.deltaTime, Space.World);
         }
     }
 }
