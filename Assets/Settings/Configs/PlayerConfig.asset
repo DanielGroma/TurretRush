@@ -13,6 +13,5 @@ MonoBehaviour:
   m_Name: PlayerConfig
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  maxHealth: 1000000
+  maxHealth: 100
   damage: 10
-  activationDistance: 15

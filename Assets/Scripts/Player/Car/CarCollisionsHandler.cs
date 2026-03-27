@@ -15,7 +15,9 @@ class CarCollisionsHandler : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy"))
         {
             var enemy = collision.gameObject.GetComponent<Enemy>();
-            enemy?.Die();
+            if (enemy.IsDead)
+                return;
+            enemy?.TakeDamage(20);
             _damageTaker.TakeDamage(enemy.EnemyDamage);
         }
     }

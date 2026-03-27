@@ -15,7 +15,6 @@ public class EnemyDeathState : IEnemyState
     private async UniTaskVoid HandleDeathAsync()
     {
         _enemy.animationHandler.PlayAnimation("Death");
-        _enemy.gameObject.GetComponent<CapsuleCollider>().enabled = false;
         await UniTask.Delay(1500);
         _enemy.Despawn();
     }

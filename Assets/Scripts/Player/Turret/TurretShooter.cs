@@ -7,6 +7,7 @@ public class TurretShooter : MonoBehaviour
 { 
     [SerializeField] private Transform _firePoint;
 
+    private GameStateManager _stateManager;
     private TurretConfig _turretConfig;
     private IPool<Projectile> _projectilePool;
     private TurretController _controller;
@@ -15,16 +16,25 @@ public class TurretShooter : MonoBehaviour
     private bool canShoot = true;
 
     [Inject]
-    public void Construct(IPool<Projectile> projectilePool, TurretController controller, InputHandler input, TurretConfig turretConfig)
+    public void Construct(
+    IPool<Projectile> projectilePool, 
+    TurretController controller, 
+    InputHandler input, 
+    TurretConfig turretConfig, 
+    GameStateManager gameStateManager)
     {
         _turretConfig = turretConfig;
         _projectilePool = projectilePool;
         _controller = controller;
         _input = input;
+        _stateManager = gameStateManager;
     }
 
     private void Update()
     {
+        if (_stateManager.CurrentState != GameState.Playing)
+            return;
+
         if (!_controller.IsActive || !canShoot)
             return;
 

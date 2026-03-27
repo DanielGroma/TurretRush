@@ -6,5 +6,4 @@ public class PlayerConfig : ScriptableObject
     public float moveSpeed = 5f;
     public float maxHealth = 100f;
     public float damage = 10f;
-    public float activationDistance = 15f;
 }

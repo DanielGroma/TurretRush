@@ -1,21 +1,27 @@
 ﻿using UnityEngine;
 using Zenject;
 
-public class CarStateHandler : MonoBehaviour
+public class GameStateHandler : MonoBehaviour
 {
     private CarMovement _carMovement;
     private GameStateManager _gameStateManager;
     private InputHandler _input;
+    private GameUIController _gameUIController;
+    private EnemySpawner _enemySpawner;
 
     [Inject]
     public void Construct(
         CarMovement carMovement,
         GameStateManager gameStateManager,
-        InputHandler input)
+        InputHandler input,
+        GameUIController gameUIController,
+        EnemySpawner enemySpawner)
     {
         _carMovement = carMovement;
         _gameStateManager = gameStateManager;
         _input = input;
+        _gameUIController = gameUIController;
+        _enemySpawner = enemySpawner;
     }
 
     private void Update()
@@ -25,6 +31,7 @@ public class CarStateHandler : MonoBehaviour
 
         if (_input.IsPressedThisFrame)
         {
+            _gameUIController.Hide();
             _gameStateManager.SetState(GameState.Playing);
         }
     }
@@ -41,13 +48,23 @@ public class CarStateHandler : MonoBehaviour
 
     private void HandleGameStateChanged(GameState newState)
     {
-        if (newState == GameState.Playing)
-            _carMovement.StartMoving();
-        else if(newState == GameState.Lose)
+        switch (newState)
         {
-            _carMovement.StopMoving();
-            Time.timeScale = 0;
-            Destroy(transform.gameObject);
+            case GameState.Playing:
+                _carMovement.StartMoving();
+                break;
+
+            case GameState.Lose:
+                _carMovement.StopMoving();
+                _enemySpawner.StopAllActiveEnemies();
+                _gameUIController.ShowLose();
+                break;
+
+            case GameState.Win:
+                _carMovement.StopMoving();
+                _enemySpawner.KillAllActiveEnemies();
+                _gameUIController.ShowWin();
+                break;
         }
     }
 }

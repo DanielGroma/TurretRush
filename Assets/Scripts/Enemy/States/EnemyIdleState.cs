@@ -5,14 +5,16 @@ public class EnemyIdleState : IEnemyState
     private Enemy _enemy;
     private EnemyConfig _enemyConfig;
     private Transform _target;
+    private GameStateManager _gameStateManager;
 
     private bool isChasing = false;
 
-    public EnemyIdleState(Enemy enemy, Transform target, EnemyConfig enemyConfig)
+    public EnemyIdleState(Enemy enemy, Transform target, EnemyConfig enemyConfig, GameStateManager gameStateManager)
     {
         _enemy = enemy;
         _target = target;
         _enemyConfig = enemyConfig;
+        _gameStateManager = gameStateManager;
     }
 
     public void Enter()
@@ -28,6 +30,8 @@ public class EnemyIdleState : IEnemyState
         if (distance <= _enemyConfig.activationDistance && !isChasing)
         {
             isChasing = true;
+            if (_gameStateManager.CurrentState != GameState.Playing)
+                return;
             _enemy.StartChasing();
         }
     }

@@ -3,6 +3,8 @@ using Zenject;
 
 public class Projectile : MonoBehaviour
 {
+    [SerializeField] private TrailRenderer _trail;
+
     private ProjectileConfig _projectileConfig;
     private ProjectilePool _pool;
     private Vector3 _direction;
@@ -20,6 +22,7 @@ public class Projectile : MonoBehaviour
 
     public void Launch(Vector3 direction)
     {
+        _trail.Clear();
         _direction = direction.normalized;
         CancelInvoke();
         Invoke(nameof(ReturnToPool), _projectileConfig.lifeTime);

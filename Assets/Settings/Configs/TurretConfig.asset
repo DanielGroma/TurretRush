@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 388be6369e4664b4f959b3b09e987cdd, type: 3}
   m_Name: TurretConfig
   m_EditorClassIdentifier: 
-  fireRate: 0.5
-  rotationSpeed: 120
+  fireRate: 0.3
+  rotationSpeed: 80
   maxAngle: 45
