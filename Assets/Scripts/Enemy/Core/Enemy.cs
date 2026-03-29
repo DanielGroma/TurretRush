@@ -18,17 +18,13 @@ public class Enemy : MonoBehaviour, IDamageable
     private GameStateManager _gameStateManager;
     private Transform _carTransform;
 
+    private EnemyHealth _health;
     private bool isDead;
+
     public bool IsDead => isDead;
     public float EnemyDamage => _config.damage;
-    private float _health;
-
-
-    public AnimationsHandler animationHandler
-    {
-        get { return _animationHandler; }
-    }
-
+    public float CollisionDamage => _config.collisionDamage;
+    public AnimationsHandler AnimationHandler => _animationHandler;
 
     public void Init(
         EnemyConfig config,
@@ -39,15 +35,23 @@ public class Enemy : MonoBehaviour, IDamageable
         _config = config;
         _onDespawn = onDespawn;
         _gameStateManager = gameStateManager;
-
-        _health = _config.maxHealth;
         _carTransform = target;
-        SetupStates(target);
-        _stateMachine.SetState(_idleState);
-        transform.gameObject.GetComponent<CapsuleCollider>().enabled = true;
+
         isDead = false;
-        _healthBar.Init(_headTransform.transform);
-        _healthBar.SetHealth(_config.maxHealth, _config.maxHealth);
+
+        SetupStates(target);
+        SetupHealth();
+
+        _stateMachine.SetState(_idleState);
+
+        if (_enemyVFXController != null)
+            _enemyVFXController.Stop();
+
+        if (_healthBar != null)
+        {
+            _healthBar.Init(_headTransform);
+            _healthBar.SetHealth(_config.maxHealth, _config.maxHealth);
+        }
     }
 
     private void SetupStates(Transform target)
@@ -59,14 +63,49 @@ public class Enemy : MonoBehaviour, IDamageable
         _deathState = new EnemyDeathState(this);
     }
 
+    private void SetupHealth()
+    {
+        if (_health != null)
+        {
+            _health.OnHealthChanged -= HandleHealthChanged;
+            _health.OnDied -= HandleDied;
+        }
+
+        _health = new EnemyHealth(_config);
+        _health.OnHealthChanged += HandleHealthChanged;
+        _health.OnDied += HandleDied;
+    }
+
     private void Update()
     {
-        _stateMachine.Update();
+        _stateMachine?.Update();
         CheckBehindDespawn();
     }
 
-    public void StartChasing() => _stateMachine.SetState(_moveState);
-    public void StopChasing() => _stateMachine.SetState(_idleState);
+    public void StartChasing()
+    {
+        if (isDead)
+            return;
+
+        _stateMachine.SetState(_moveState);
+    }
+
+    public void StopChasing()
+    {
+        if (isDead)
+            return;
+
+        _stateMachine.SetState(_idleState);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (isDead)
+            return;
+
+        _health.TakeDamage(damage);
+    }
+
     public void Die()
     {
         if (isDead)
@@ -75,7 +114,34 @@ public class Enemy : MonoBehaviour, IDamageable
         isDead = true;
         _stateMachine.SetState(_deathState);
     }
-    public void Despawn() => _onDespawn?.Invoke(this);
+
+    public void Despawn()
+    {
+        if (_enemyVFXController != null)
+            _enemyVFXController.Stop();
+
+        if (_health != null)
+        {
+            _health.OnHealthChanged -= HandleHealthChanged;
+            _health.OnDied -= HandleDied;
+        }
+
+        _onDespawn?.Invoke(this);
+    }
+
+    private void HandleHealthChanged(float previousHealth, float currentHealth)
+    {
+        if (_enemyVFXController != null)
+            _enemyVFXController.Play();
+
+        if (_healthBar != null)
+            _healthBar.SetHealth(currentHealth, _health.MaxHealth);
+    }
+
+    private void HandleDied()
+    {
+        Die();
+    }
 
     private void CheckBehindDespawn()
     {
@@ -83,28 +149,9 @@ public class Enemy : MonoBehaviour, IDamageable
             return;
 
         Vector3 toEnemy = transform.position - _carTransform.position;
-
         float dot = Vector3.Dot(_carTransform.forward, toEnemy);
 
-        if (dot < 0)
-        {
-            float distance = toEnemy.magnitude;
-
-            if (distance > _despawnDistanceBehind)
-            {
-                Despawn();
-            }
-        }
-    }
-    public void TakeDamage(float damage)
-    {
-        if (isDead)
-            return;
-
-        _health -= damage;
-        _enemyVFXController.Play();
-        _healthBar.SetHealth(_health, _config.maxHealth);
-        if (_health <= 0)
-            Die();
+        if (dot < 0f && toEnemy.magnitude > _despawnDistanceBehind)
+            Despawn();
     }
 }

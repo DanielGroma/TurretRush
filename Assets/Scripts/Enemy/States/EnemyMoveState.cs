@@ -15,7 +15,7 @@ public class EnemyMoveState : IEnemyState
 
     public void Enter() 
     {
-        _enemy.animationHandler.PlayAnimation("Walk");
+        _enemy.AnimationHandler.PlayAnimation("Walk");
     }
 
     public void Update()
@@ -35,10 +35,5 @@ public class EnemyMoveState : IEnemyState
                 Time.deltaTime * 10f
             );
         }
-    }
-
-    public void Exit() 
-    {
-        _enemy.animationHandler.StopAnimation();
     }
 }

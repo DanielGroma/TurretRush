@@ -6,7 +6,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private TrailRenderer _trail;
 
     private ProjectileConfig _projectileConfig;
-    private ProjectilePool _pool;
+    private IPool<Projectile> _pool;
     private Vector3 _direction;
 
     [Inject]
@@ -15,7 +15,7 @@ public class Projectile : MonoBehaviour
         _projectileConfig = projectileConfig;
     }
 
-    public void SetPool(ProjectilePool pool)
+    public void SetPool(IPool<Projectile> pool)
     {
         _pool = pool;
     }

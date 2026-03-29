@@ -1,30 +1,46 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class CarHealthBar : MonoBehaviour
 {
     [SerializeField] private Slider _slider;
 
-    private float _target = 1f;
-    private float _current = 1f;
+    private CarHealth _carHealth;
 
-    [SerializeField] private float _smoothSpeed = 5f;
+    [Inject]
+    public void Construct(CarHealth carHealth)
+    {
+        _carHealth = carHealth;
+    }
+
+    private void OnEnable()
+    {
+        if (_carHealth != null)
+            _carHealth.OnHealthChanged += HandleHealthChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (_carHealth != null)
+            _carHealth.OnHealthChanged -= HandleHealthChanged;
+    }
+
+    private void Start()
+    {
+        SetHealth(_carHealth.CurrentHealth, _carHealth.MaxHealth);
+    }
+
+    private void HandleHealthChanged(float previousHealth, float currentHealth)
+    {
+        SetHealth(currentHealth, _carHealth.MaxHealth);
+    }
 
     public void SetHealth(float current, float max)
     {
-        _target = current / max;
-    }
+        if (_slider == null || max <= 0f)
+            return;
 
-    private void Update()
-    {
-        _current = Mathf.MoveTowards(_current, _target, _smoothSpeed * Time.deltaTime);
-        _slider.value = _current;
-    }
-
-    public void ResetBar()
-    {
-        _current = 1f;
-        _target = 1f;
-        _slider.value = 1f;
+        _slider.value = current / max;
     }
 }

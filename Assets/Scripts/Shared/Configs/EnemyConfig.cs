@@ -7,4 +7,5 @@ public class EnemyConfig : ScriptableObject
     public float maxHealth = 20f;
     public float damage = 10f;
     public float activationDistance = 15f;
+    public float collisionDamage = 20;
 }

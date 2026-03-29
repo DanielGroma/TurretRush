@@ -2,6 +2,8 @@
 using Cysharp.Threading.Tasks;
 using Zenject;
 using UnityEngine.InputSystem;
+using System.Threading;
+using System;
 
 public class TurretShooter : MonoBehaviour
 { 
@@ -14,6 +16,8 @@ public class TurretShooter : MonoBehaviour
     private InputHandler _input;
 
     private bool canShoot = true;
+    private CancellationToken _destroyToken;
+
 
     [Inject]
     public void Construct(
@@ -29,7 +33,10 @@ public class TurretShooter : MonoBehaviour
         _input = input;
         _stateManager = gameStateManager;
     }
-
+    private void Awake()
+    {
+        _destroyToken = this.GetCancellationTokenOnDestroy();
+    }
     private void Update()
     {
         if (_stateManager.CurrentState != GameState.Playing)
@@ -55,12 +62,22 @@ public class TurretShooter : MonoBehaviour
         proj.Launch(shootDirection);
 
         canShoot = false;
-        ResetCooldownAsync().Forget();
+        ResetCooldownAsync(_destroyToken).Forget();
     }
 
-    private async UniTaskVoid ResetCooldownAsync()
+    private async UniTask ResetCooldownAsync(CancellationToken token)
     {
-        await UniTask.Delay(System.TimeSpan.FromSeconds(_turretConfig.fireRate));
-        canShoot = true;
+        try
+        {
+            await UniTask.Delay(
+                System.TimeSpan.FromSeconds(_turretConfig.fireRate),
+                cancellationToken: token);
+
+            canShoot = true;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
     }
 }

@@ -7,7 +7,7 @@ public class EnemyIdleState : IEnemyState
     private Transform _target;
     private GameStateManager _gameStateManager;
 
-    private bool isChasing = false;
+    private bool isChasing;
 
     public EnemyIdleState(Enemy enemy, Transform target, EnemyConfig enemyConfig, GameStateManager gameStateManager)
     {
@@ -19,7 +19,8 @@ public class EnemyIdleState : IEnemyState
 
     public void Enter()
     {
-        _enemy.animationHandler.PlayAnimation("Idle");
+        _enemy.AnimationHandler.PlayAnimation("Idle");
+        isChasing = false;
     }
 
     public void Update()
@@ -34,10 +35,5 @@ public class EnemyIdleState : IEnemyState
                 return;
             _enemy.StartChasing();
         }
-    }
-
-    public void Exit() 
-    {
-        _enemy.animationHandler.StopAnimation();
     }
 }

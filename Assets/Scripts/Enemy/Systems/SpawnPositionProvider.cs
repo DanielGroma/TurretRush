@@ -3,15 +3,13 @@
 public class SpawnPositionProvider : ISpawnPositionProvider
 {
     private Transform _carTransform;
-    private Camera _camera;
     private float _spawnDistance;
     private float _horizontalRange;
     private LayerMask _roadLayer;
 
-    public SpawnPositionProvider(Transform carTransform, Camera camera, float spawnDistance, float horizontalRange, LayerMask roadLayer)
+    public SpawnPositionProvider(Transform carTransform, float spawnDistance, float horizontalRange, LayerMask roadLayer)
     {
         _carTransform = carTransform;
-        _camera = camera;
         _spawnDistance = spawnDistance;
         _horizontalRange = horizontalRange;
         _roadLayer = roadLayer;

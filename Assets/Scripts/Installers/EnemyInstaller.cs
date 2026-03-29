@@ -6,7 +6,6 @@ public class EnemyInstaller : MonoInstaller
     [SerializeField] private Enemy _enemyPrefab;
     [SerializeField] private EnemyConfig _enemyConfig;
     [SerializeField] private Transform _carTransform;
-    [SerializeField] private Camera _camera;
     [SerializeField] private LayerMask _roadLayer;
 
     public override void InstallBindings()
@@ -16,7 +15,7 @@ public class EnemyInstaller : MonoInstaller
         Container.Bind<ISpawnPositionProvider>()
             .To<SpawnPositionProvider>()
             .AsSingle()
-            .WithArguments(_carTransform, _camera, 70f, 8f, _roadLayer);
+            .WithArguments(_carTransform, 70f, 8f, _roadLayer);
 
         Container.Bind<IPool<Enemy>>()
             .To<EnemyPool>()

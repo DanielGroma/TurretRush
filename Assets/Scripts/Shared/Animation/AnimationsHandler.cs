@@ -12,9 +12,5 @@ public class AnimationsHandler : MonoBehaviour
         }
         _animator.Play(animationName);
     }
-    public void StopAnimation()
-    {
-        _animator.StopPlayback();
-    }
 }
 

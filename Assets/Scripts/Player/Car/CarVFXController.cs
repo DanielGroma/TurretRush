@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Zenject;
 
 public class CarVFXController : MonoBehaviour
 {
@@ -38,12 +39,19 @@ public class CarVFXController : MonoBehaviour
     [SerializeField] private float _maxShakeRotation = 1.5f;
     [SerializeField] private float _shakeSpeed = 18f;
 
+    private CarHealth _carHealth;
+
     private float _currentNormalizedHealth = 1f;
-    private float _lastNormalizedHealth = 1f;
     private float _criticalTimer = 0f;
 
     private Vector3 _initialLocalPosition;
     private Quaternion _initialLocalRotation;
+
+    [Inject]
+    public void Construct(CarHealth carHealth)
+    {
+        _carHealth = carHealth;
+    }
 
     private void Awake()
     {
@@ -56,10 +64,36 @@ public class CarVFXController : MonoBehaviour
         SetHealthNormalized(1f);
     }
 
+    private void OnEnable()
+    {
+        if (_carHealth != null)
+            _carHealth.OnHealthChanged += HandleHealthChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (_carHealth != null)
+            _carHealth.OnHealthChanged -= HandleHealthChanged;
+    }
+
+    private void Start()
+    {
+        SetHealthNormalized(_carHealth.CurrentHealth / _carHealth.MaxHealth);
+    }
+
     private void Update()
     {
         HandleCriticalSmoke();
         HandleShake();
+    }
+
+    private void HandleHealthChanged(float previousHealth, float currentHealth)
+    {
+        float previousNormalized = previousHealth / _carHealth.MaxHealth;
+        float currentNormalized = currentHealth / _carHealth.MaxHealth;
+
+        SetHealthNormalized(currentNormalized);
+        PlayDamageBurst(previousNormalized, currentNormalized);
     }
 
     public void SetHealthNormalized(float normalizedHealth)
@@ -162,7 +196,6 @@ public class CarVFXController : MonoBehaviour
     public void ResetState()
     {
         _currentNormalizedHealth = 1f;
-        _lastNormalizedHealth = 1f;
         _criticalTimer = 0f;
 
         SetHealthNormalized(1f);

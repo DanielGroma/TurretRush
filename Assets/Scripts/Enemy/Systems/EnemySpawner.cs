@@ -1,5 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using Zenject;
 
@@ -36,19 +38,26 @@ public class EnemySpawner : MonoBehaviour
         for (int i = 0; i < _initialCount; i++)
             SpawnInView();
 
-        SpawnLoop().Forget();
+        SpawnLoop(this.GetCancellationTokenOnDestroy()).Forget();
     }
 
-    private async UniTask SpawnLoop()
+    private async UniTask SpawnLoop(CancellationToken token)
     {
-        await UniTask.Delay(_spawnDelayMs);
-
-        while (true)
+        try
         {
-            if (_gameStateManager.CurrentState == GameState.Playing)
-                SpawnOutOfView();
+            await UniTask.Delay(_spawnDelayMs, cancellationToken: token);
 
-            await UniTask.Delay(_spawnDelayMs);
+            while (!token.IsCancellationRequested)
+            {
+                if (_gameStateManager.CurrentState == GameState.Playing)
+                    SpawnOutOfView();
+
+                await UniTask.Delay(_spawnDelayMs, cancellationToken: token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
         }
     }
 
@@ -75,7 +84,7 @@ public class EnemySpawner : MonoBehaviour
     private void OnEnemyDespawn(Enemy enemy)
     {
         _activeEnemies.Remove(enemy);
-        _pool.Return(enemy);
+        _pool?.Return(enemy);
     }
 
     public void KillAllActiveEnemies()

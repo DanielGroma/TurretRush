@@ -4,13 +4,11 @@ using Zenject;
 public class FinishTrigger : MonoBehaviour
 {
     private GameStateManager _gameStateManager;
-    private EnemySpawner _enemySpawner;
 
     [Inject]
-    public void Construct(GameStateManager gameStateManager, EnemySpawner enemySpawner)
+    public void Construct(GameStateManager gameStateManager)
     {
         _gameStateManager = gameStateManager;
-        _enemySpawner = enemySpawner;
     }
 
     private void OnTriggerEnter(Collider other)
